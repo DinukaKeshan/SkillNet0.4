@@ -1,0 +1,45 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Ignore virtual environment folder
+venv/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore the trained ML model files
+*.pkl
+*.h5
+
+# Ignore CSVs containing sensitive data or intermediate results
+data/model-data.csv
+data/cleaned_quiz_data.csv
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore Jupyter notebook checkpoints (if using Jupyter)
+.ipynb_checkpoints/

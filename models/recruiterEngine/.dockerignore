@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+readMe.txt
+test_model.py
+train_model.py
+recruiter_engine.py

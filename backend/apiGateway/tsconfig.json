@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    // Target modern JavaScript
+    "target": "ES2020",
+    
+    // Module system
+    "module": "CommonJS",
+    
+    // Source and output directories
+    "rootDir": "./src",
+    "outDir": "./dist",
+    
+    // Enable strict type-checking
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    
+    // Module interoperability
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    // Skip type checking of declaration files
+    "skipLibCheck": true,
+    
+    // Source maps for debugging
+    "sourceMap": true,
+    
+    // Generate declaration files for TypeScript types
+    "declaration": true,
+    "declarationMap": true,
+    
+    // Node types
+    "types": ["node"]
+  },
+  
+  // Include all TS files in src folder
+  "include": [
+    "src/**/*.ts",
+    "src/**/*",
+    "src/middleware/**/*"
+  ],
+  
+  // Exclude node_modules and output folder
+  "exclude": ["node_modules", "dist"]
+}

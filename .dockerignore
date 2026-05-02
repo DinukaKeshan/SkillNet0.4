@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Node
+**/node_modules
+**/.next
+**/dist
+
+# Python
+**/__pycache__
+**/*.pyc
+**/env
+**/venv
+**/.venv
+
+# IDE
+.vscode
+.idea
+
+# Docker
+docker-compose.override.yml
+
+# Docs
+docs/
+*.md
+!db/*.sql
+
+# Misc
+*.tar
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db

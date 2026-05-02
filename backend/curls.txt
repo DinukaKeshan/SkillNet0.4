@@ -1,0 +1,35 @@
+
+auth related
+
+curl --location 'http://localhost:5001/api/signup' --header 'Content-Type: application/json' --data-raw '{
+  "role": "admin",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}'
+
+curl --location 'http://localhost:5001/api/signin' --header 'Content-Type: application/json' --data-raw '{
+  "email": "john@example.com",
+  "password": "password123"
+}'
+
+curl -X POST http://localhost:5000/api/signup \
+-H "Content-Type: application/json" \
+-d '{"role":"Student","name":"Thanura","email":"thanura@example.com","password":"123456"}'
+
+
+curl -X POST http://localhost:5000/api/signin \
+-H "Content-Type: application/json" \
+-d '{"email":"thanura@example.com","password":"123456"}'
+
+jwt impl
+
+curl -X POST http://localhost:5000/api/signin \
+-H "Content-Type: application/json" \
+-d '{"email":"thanura@example.com","password":"123456"}'
+{"message":"Login successful","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6IlN0dWRlbnQiLCJuYW1lIjoiVGhhbnVyYSIsImlhdCI6MTc2MjUzMDI0MCwiZXhwIjoxNzYyNTM3NDQwfQ.666FNPaGNsOXDpQtww0hb2ob1v4UHh4HlAX4JYsy_9w","user":{"id":2,"name":"Thanura","role":"Student"}}thanura@localhost:~/SkillNet$ 
+
+
+curl -X GET http://localhost:5000/api/protected \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6IlN0dWRlbnQiLCJuYW1lIjoiVGhhbnVyYSIsImlhdCI6MTc2MjUzMDI0MCwiZXhwIjoxNzYyNTM3NDQwfQ.666FNPaGNsOXDpQtww0hb2ob1v4UHh4HlAX4JYsy_9w"
+{"message":"Welcome Thanura, you are a Student!"}thanura@localhost:~/SkillNet$ 

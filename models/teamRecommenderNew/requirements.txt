@@ -1,0 +1,5 @@
+flask
+gensim
+numpy
+scikit-learn
+mysql-connector-python

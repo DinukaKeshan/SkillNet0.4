@@ -1,0 +1,237 @@
+# How to Run SkillNet — Complete Step-by-Step Guide
+
+## Prerequisites
+
+| Tool | Required For | Check Command |
+|------|-------------|---------------|
+| Node.js 20+ | Manual method | `node --version` |
+| Python 3.9+ | Both methods | `python --version` |
+| MySQL 8.0 | Manual method | `mysql --version` |
+| Docker Desktop | Docker method | `docker --version` |
+
+---
+
+# Method 1: Docker (Recommended — Easiest)
+
+> [!TIP]
+> Docker handles everything automatically — database, all 7 services, networking. Just 3 commands!
+
+### Step 1: Generate ML Models (One-Time)
+
+The FastText models are too large for Git. Train them locally first:
+
+```powershell
+# Install Python dependencies
+pip install -r models/teamRecommenderNew/requirements.txt
+
+# Train Team Recommender model (run FROM its directory)
+cd d:\Projects\SkillNet\models\teamRecommenderNew
+python train_model.py
+
+# Train Project Matcher model (run FROM its directory)
+cd d:\Projects\SkillNet\models\projectMatcherNew
+python train_model.py
+```
+
+> [!IMPORTANT]
+> You MUST `cd` into each model directory first. The training scripts use relative paths.
+
+### Step 2: Start Everything
+
+```powershell
+cd d:\Projects\SkillNet
+docker compose up --build -d
+```
+
+That's it! Docker will:
+- Pull/build all images
+- Create a MySQL database with seed data
+- Start all 7 services with proper networking
+- Handle the startup order automatically
+
+### Step 3: Verify
+
+```powershell
+docker compose ps
+```
+
+All 7 containers should show `Up`:
+
+| Container | Port | Status |
+|-----------|------|--------|
+| skillnet-db | 3307 | Up (healthy) |
+| skillnet-backend | 5001 | Up |
+| skillnet-api-gateway | 5000 | Up |
+| skillnet-frontend | 3000 | Up |
+| skillnet-team-recommender | 5002 | Up |
+| skillnet-project-matcher | 5003 | Up |
+| skillnet-recruiter-engine | 5004 | Up |
+
+### Step 4: Open the App
+
+Open **http://localhost:3000** in your browser 🎉
+
+### Docker Commands Reference
+
+```powershell
+# Stop all services
+docker compose down
+
+# Stop and reset database (full clean restart)
+docker compose down -v
+
+# View logs for a specific service
+docker compose logs backend
+docker compose logs frontend
+
+# Rebuild a single service
+docker compose up --build -d backend
+```
+
+> [!NOTE]
+> If your local MySQL is running on port 3306, Docker uses port **3307** for its MySQL to avoid conflicts. The internal Docker networking still uses 3306 between containers.
+
+---
+
+# Method 2: Run Manually (Without Docker)
+
+### Step 1: Set Up MySQL Database
+
+```powershell
+# Create database and user (replace 2001 with your MySQL root password)
+mysql -u root -p2001 -e "CREATE DATABASE IF NOT EXISTS skillnet CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS 'skillnet'@'localhost' IDENTIFIED BY 'Skillnet@123'; GRANT ALL PRIVILEGES ON skillnet.* TO 'skillnet'@'localhost'; FLUSH PRIVILEGES;"
+
+# Restore seed data
+cd d:\Projects\SkillNet
+Get-Content db/skillnet_full_dump.sql | mysql -u skillnet -pSkillnet@123 skillnet
+
+# Verify tables (should show 10 tables)
+mysql -u skillnet -pSkillnet@123 skillnet -e "SHOW TABLES;"
+```
+
+Expected tables: `auth`, `company_hire_requests`, `hiring_requests`, `job_roles`, `jobs_lsc`, `projects`, `projects_sme`, `skills`, `team_join_requests`, `teams`
+
+### Step 2: Train ML Models (One-Time)
+
+```powershell
+# Train Team Recommender model
+cd d:\Projects\SkillNet\models\teamRecommenderNew
+python train_model.py
+
+# Train Project Matcher model
+cd d:\Projects\SkillNet\models\projectMatcherNew
+python train_model.py
+```
+
+> [!IMPORTANT]
+> You MUST `cd` into each model directory first. The training scripts use relative paths.
+
+### Step 3: Start All 6 Services (6 Separate Terminals)
+
+Start in this order:
+
+#### Terminal 1 — Backend Server (Port 5001)
+```powershell
+cd d:\Projects\SkillNet\backend\server
+npm install
+npm run dev
+```
+✅ Expected: `🚀 Server running on http://localhost:5001`
+
+#### Terminal 2 — API Gateway (Port 5000)
+```powershell
+cd d:\Projects\SkillNet\backend\apiGateway
+npm install
+npm run dev
+```
+✅ Expected: `🚪 API Gateway running on http://localhost:5000`
+
+#### Terminal 3 — Frontend (Port 3000)
+```powershell
+cd d:\Projects\SkillNet\frontend
+npm install
+npm run dev
+```
+✅ Expected: `✓ Ready in Xms` at `http://localhost:3000`
+
+#### Terminal 4 — Team Recommender ML (Port 5002)
+```powershell
+cd d:\Projects\SkillNet\models\teamRecommenderNew
+pip install -r requirements.txt
+python api/app.py
+```
+✅ Expected: `Running on http://127.0.0.1:5002`
+
+#### Terminal 5 — Project Matcher ML (Port 5003)
+```powershell
+cd d:\Projects\SkillNet\models\projectMatcherNew
+pip install -r requirements.txt
+python api/app.py
+```
+✅ Expected: `Running on http://127.0.0.1:5003`
+
+#### Terminal 6 — Recruiter Engine ML (Port 5004)
+```powershell
+cd d:\Projects\SkillNet\models\recruiterEngine
+pip install -r requirements.txt
+python app.py
+```
+✅ Expected: `Running on http://127.0.0.1:5004`
+
+### Step 4: Open the App
+
+Open **http://localhost:3000** in your browser 🎉
+
+### Stopping Services
+
+- Press `Ctrl+C` in each terminal
+- To reset database: `mysql -u root -p2001 -e "DROP DATABASE skillnet;"` and re-run Step 1
+
+---
+
+# Quick Reference
+
+## Startup Order
+```
+MySQL (service or Docker)
+  └─► Backend Server (5001)
+        └─► API Gateway (5000)
+              └─► Frontend (3000)
+  └─► Team Recommender (5002)
+  └─► Project Matcher (5003)
+  └─► Recruiter Engine (5004)
+```
+
+## All Service URLs
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **Frontend** | http://localhost:3000 | Main web app |
+| **API Gateway** | http://localhost:5000 | Routes API requests |
+| **Backend Server** | http://localhost:5001 | Core API |
+| **Team Recommender** | http://localhost:5002 | AI team matching |
+| **Project Matcher** | http://localhost:5003 | AI project matching |
+| **Recruiter Engine** | http://localhost:5004 | AI student ranking |
+
+## Environment Files (Manual method only)
+
+### `backend/server/.env`
+```env
+DB_HOST=localhost
+DB_USER=skillnet
+DB_PASSWORD=Skillnet@123
+DB_NAME=skillnet
+DB_PORT=3306
+PORT=5001
+JWT_SECRET=supersecretjwtkey123
+```
+
+### `backend/apiGateway/.env`
+```env
+PORT=5000
+BACKEND_BASE_URL=http://localhost:5001
+JWT_SECRET=supersecretjwtkey123
+```
+
+> [!IMPORTANT]
+> The `JWT_SECRET` must be **identical** in both `.env` files.
