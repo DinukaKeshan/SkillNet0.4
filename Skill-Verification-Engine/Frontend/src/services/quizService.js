@@ -24,3 +24,7 @@ export const nextQuestion = (quizId, questionIndex) =>
 // submitQuiz takes full answers array + time taken
 export const submitQuiz = (quizId, answers, timeTakenSec) =>
   API.post("/quiz/submit", { quizId, answers, timeTakenSec });
+
+// Get all completed quiz history for current user
+export const getAllQuizHistory = () =>
+  API.get("/quiz/history/all");

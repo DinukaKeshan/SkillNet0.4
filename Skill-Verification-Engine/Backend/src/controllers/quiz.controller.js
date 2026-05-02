@@ -494,3 +494,24 @@ export const getQuizHistory = async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error" });
   }
 };
+
+// ─── GET ALL QUIZ HISTORY ────────────────────────────────────────────────────
+
+/**
+ * GET /api/quiz/history/all
+ * Returns all completed quiz attempts for the current user (all skills).
+ */
+export const getAllQuizHistory = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+
+    const attempts = await Quiz.find({ user: userId, status: "completed" })
+      .sort({ createdAt: -1 })
+      .select("skill score score_pct verified skill_level confidence attempt_number time_taken_sec createdAt");
+
+    return res.status(200).json({ success: true, data: attempts });
+  } catch (error) {
+    console.error("getAllQuizHistory error:", error);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+};

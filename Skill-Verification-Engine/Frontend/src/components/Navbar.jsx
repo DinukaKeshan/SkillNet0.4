@@ -26,7 +26,7 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "Skills", path: "/skills" },
     { name: "Verify", path: "/verify-skill" },
-    { name: "Quiz", path: "/quiz" },
+    { name: "Quiz", path: "/quiz-history" },
     { name: "Profile", path: "/profile" },
   ];
 
@@ -35,21 +35,27 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/92 backdrop-blur-xl shadow-sm border-b border-slate-200/50"
-            : "bg-white/98 border-b border-slate-200/60"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300`}
+        style={{
+          background: scrolled
+            ? "linear-gradient(135deg, #6366f1, #06b6d4)"
+            : "rgba(255,255,255,0.98)",
+          backdropFilter: "blur(12px)",
+          borderBottom: scrolled ? "none" : "1px solid rgba(226,232,240,0.6)",
+          boxShadow: scrolled ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-[70px]">
+          <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
             <Link
               to="/"
-              className="text-[1.4rem] font-extrabold tracking-wide text-indigo-500 hover:text-indigo-600 transition-colors duration-300 shrink-0"
+              className={`text-[1.4rem] font-extrabold tracking-wide transition-colors duration-300 shrink-0 ${
+                scrolled ? "text-white" : "text-indigo-500 hover:text-indigo-600"
+              }`}
             >
-              SkillEngine
+              SkillNet SVE
             </Link>
 
             {/* Desktop Nav Links */}
@@ -60,14 +66,15 @@ export default function Navbar() {
                   to={link.path}
                   className={`relative px-4 py-2 text-[0.95rem] font-medium transition-colors duration-300 group rounded-md
                     ${isActive(link.path)
-                      ? "text-indigo-500"
-                      : "text-slate-600 hover:text-indigo-500"
+                      ? (scrolled ? "text-white" : "text-indigo-500")
+                      : (scrolled ? "text-white/80 hover:text-white" : "text-slate-600 hover:text-indigo-500")
                     }`}
                 >
                   {link.name}
                   {/* Underline indicator */}
                   <span
-                    className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 bg-indigo-500 rounded-full transition-all duration-300
+                    className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300
+                      ${scrolled ? "bg-white" : "bg-indigo-500"}
                       ${isActive(link.path) ? "w-[60%]" : "w-0 group-hover:w-[60%]"}`}
                   />
                 </Link>
@@ -78,12 +85,16 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-3">
               {authenticated ? (
                 <>
-                  <span className="text-sm font-semibold text-slate-600">
+                  <span className={`text-sm font-semibold ${scrolled ? "text-white/90" : "text-slate-600"}`}>
                     Hello, {user?.name || "User"}
                   </span>
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-1.5 text-sm font-medium border border-slate-300 text-slate-600 rounded-lg hover:border-indigo-400 hover:text-indigo-500 transition-all duration-300"
+                    className={`px-4 py-1.5 text-sm font-medium border rounded-lg transition-all duration-300 ${
+                      scrolled
+                        ? "border-white/40 text-white/90 hover:border-white hover:text-white hover:bg-white/10"
+                        : "border-slate-300 text-slate-600 hover:border-indigo-400 hover:text-indigo-500"
+                    }`}
                   >
                     Logout
                   </button>
@@ -120,7 +131,9 @@ export default function Navbar() {
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-md text-slate-600 hover:text-indigo-500 transition-colors"
+              className={`md:hidden p-2 rounded-md transition-colors ${
+                scrolled ? "text-white/90 hover:text-white" : "text-slate-600 hover:text-indigo-500"
+              }`}
               aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -189,7 +202,7 @@ export default function Navbar() {
       </header>
 
       {/* Spacer */}
-      <div className="h-16 md:h-[70px]" />
+      <div className="h-16" />
     </>
   );
 }

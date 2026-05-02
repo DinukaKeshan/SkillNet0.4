@@ -36,3 +36,7 @@ export const getRoadmap = (userId, skill) =>
 // New: get past quiz attempts for progress tracking
 export const getQuizHistory = (userId, skill) =>
   API.get(`/quiz/history/${userId}/${skill}`);
+
+// Delete a skill from SVE
+export const deleteSkill = (skill) =>
+  API.delete("/skills", { data: { skill } });

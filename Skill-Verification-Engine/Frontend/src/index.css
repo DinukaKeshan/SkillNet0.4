@@ -1,1 +1,20 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+
+:root {
+  --sn-primary: #6366f1;
+  --sn-primary-hover: #4f46e5;
+  --sn-accent: #06b6d4;
+  --sn-gradient: linear-gradient(135deg, #6366f1, #06b6d4);
+  --sn-gradient-alt: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --sn-bg: #f8fafc;
+  --sn-card-radius: 12px;
+  --sn-font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--sn-font);
+}
+
+.font-display { font-family: 'Syne', sans-serif; }
+.font-body { font-family: var(--sn-font); }

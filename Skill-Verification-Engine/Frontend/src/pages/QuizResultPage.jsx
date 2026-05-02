@@ -69,9 +69,7 @@ export default function QuizResultPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 relative overflow-hidden">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
         .font-display { font-family: 'Syne', sans-serif; }
-        .font-body    { font-family: 'DM Sans', sans-serif; }
         @keyframes slide-up  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         @keyframes pop-in    { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
         @keyframes stroke-draw { from{stroke-dashoffset:${circumference}} to{stroke-dashoffset:${dashOffset}} }
@@ -256,17 +254,17 @@ export default function QuizResultPage() {
         {/* ── 5. CTA Row ───────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row gap-3 anim-up-d3">
           <button id="view-roadmap-btn"
-            onClick={() => navigate(`/roadmap/${encodeURIComponent(skill)}`, {
-              state: { skill_level, skill, scorePercent, verified }
-            })}
+            onClick={() => navigate(`/roadmap/${encodeURIComponent(skill)}`)}
             className="flex-1 font-display font-bold text-white py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
             style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 4px 18px rgba(99,102,241,0.3)" }}>
             📍 View Learning Roadmap
           </button>
           <button id="back-dashboard-btn"
-            onClick={() => navigate("/dashboard/skills")}
+            onClick={() => {
+              window.location.href = `http://localhost:3000/student?verifiedSkill=${encodeURIComponent(skill)}&fromSVE=true`;
+            }}
             className="flex-1 font-body font-semibold text-slate-600 py-3.5 rounded-xl text-sm border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
-            ← Back to Dashboard
+            ← Back to SkillNet Dashboard
           </button>
         </div>
 

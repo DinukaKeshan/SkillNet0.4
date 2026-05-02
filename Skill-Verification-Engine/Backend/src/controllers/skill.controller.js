@@ -197,19 +197,26 @@ export const getQuizHistory = async (req, res) => {
 /**
  * Get roadmap for a student + skill
  * GET /api/roadmap/:studentId/:skill
+ * Note: studentId param is kept for URL compat but we use req.user from protect middleware
  */
 export const getRoadmap = async (req, res) => {
   try {
-    const { studentId, skill } = req.params;
-    console.log(`📍 getRoadmap: studentId=${studentId}, skill="${skill}"`);
+    const { skill } = req.params;
+    // Use the authenticated user from protect middleware — more reliable than URL param
+    const user = req.user;
+    console.log(`📍 getRoadmap: userId=${user._id}, skill="${skill}"`);
 
-    const user = await User.findById(studentId).select("skillProfiles");
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    // Reload skillProfiles if not populated on req.user
+    let profiles = user.skillProfiles;
+    if (!profiles || profiles.length === 0) {
+      const freshUser = await User.findById(user._id).select("skillProfiles");
+      profiles = freshUser?.skillProfiles || [];
+    }
 
-    console.log(`📍 getRoadmap: user has ${user.skillProfiles?.length ?? 0} skill profile(s):`,
-      user.skillProfiles?.map(sp => sp.skill_name));
+    console.log(`📍 getRoadmap: user has ${profiles.length} skill profile(s):`,
+      profiles.map(sp => sp.skill_name));
 
-    const profile = user.skillProfiles?.find(
+    const profile = profiles.find(
       sp => sp.skill_name?.toLowerCase() === skill.toLowerCase()
     );
 
@@ -230,5 +237,114 @@ export const getRoadmap = async (req, res) => {
   } catch (error) {
     console.error("getRoadmap error:", error);
     return res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+/**
+ * Sync-add skill from SkillNet dashboard (fire-and-forget).
+ * POST /api/skills/sync-add
+ * Idempotent — if skill already exists, no-op.
+ */
+export const syncAddSkill = async (req, res) => {
+  const { skill } = req.body;
+  if (!skill) {
+    return res.status(400).json({ message: "Skill is required" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const exists = user.skills.some(s => {
+      const name = typeof s === "string" ? s : s?.skill_name ?? "";
+      return name.toLowerCase() === skill.toLowerCase();
+    });
+
+    if (!exists) {
+      user.skills.push(skill);
+      await user.save();
+    }
+
+    return res.status(200).json({ message: "Skill synced" });
+  } catch (error) {
+    console.error("syncAddSkill error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * Sync-remove skill from SkillNet dashboard (fire-and-forget).
+ * POST /api/skills/sync-remove
+ * Removes from skills[], skillProfiles[], verifiedSkills[],
+ * and deletes associated Quiz + QuizHistory documents.
+ */
+export const syncRemoveSkill = async (req, res) => {
+  const { skill } = req.body;
+  if (!skill) {
+    return res.status(400).json({ message: "Skill is required" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Remove from skills[]
+    user.skills = user.skills.filter(s => {
+      const name = typeof s === "string" ? s : s?.skill_name ?? "";
+      return name.toLowerCase() !== skill.toLowerCase();
+    });
+
+    // Remove from skillProfiles[]
+    if (user.skillProfiles) {
+      user.skillProfiles = user.skillProfiles.filter(
+        sp => sp.skill_name?.toLowerCase() !== skill.toLowerCase()
+      );
+    }
+
+    // Remove from verifiedSkills[]
+    if (user.verifiedSkills) {
+      user.verifiedSkills = user.verifiedSkills.filter(
+        vs => vs.skill?.toLowerCase() !== skill.toLowerCase()
+      );
+    }
+
+    await user.save();
+
+    // Delete associated Quiz and QuizHistory documents
+    const { default: QuizHistory } = await import("../models/quizHistory.model.js");
+    await Quiz.deleteMany({ user: req.user._id, skill: { $regex: new RegExp(`^${skill}$`, "i") } });
+    await QuizHistory.deleteMany({ user: req.user._id, skill: { $regex: new RegExp(`^${skill}$`, "i") } });
+
+    return res.status(200).json({ message: "Skill removed and synced" });
+  } catch (error) {
+    console.error("syncRemoveSkill error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * Delete a skill from the user's skills[] array in SVE.
+ * DELETE /api/skills
+ */
+export const deleteSkill = async (req, res) => {
+  const { skill } = req.body;
+  if (!skill) {
+    return res.status(400).json({ message: "Skill is required" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.skills = user.skills.filter(s => {
+      const name = typeof s === "string" ? s : s?.skill_name ?? "";
+      return name.toLowerCase() !== skill.toLowerCase();
+    });
+
+    await user.save();
+    return res.status(200).json({ message: "Skill deleted", skills: user.skills });
+  } catch (error) {
+    console.error("deleteSkill error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };

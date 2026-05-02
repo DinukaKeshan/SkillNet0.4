@@ -67,9 +67,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-[#f8f7ff] flex items-center justify-center relative overflow-hidden">
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
           .font-display{font-family:'Syne',sans-serif}
-          .font-body{font-family:'DM Sans',sans-serif}
           @keyframes spin-ring{to{transform:rotate(360deg)}}
           @keyframes pulse-blob{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.15);opacity:.9}}
           .spin-ring{animation:spin-ring 1.1s linear infinite}
@@ -103,9 +101,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-[#f8f7ff] flex items-center justify-center px-4">
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
           .font-display{font-family:'Syne',sans-serif}
-          .font-body{font-family:'DM Sans',sans-serif}
         `}</style>
         <div className="bg-white rounded-2xl border border-red-100 shadow-xl p-10 text-center max-w-md w-full">
           <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-2xl mx-auto mb-4">⚠️</div>
@@ -127,9 +123,7 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-[#f8f7ff] py-10 px-4 relative overflow-hidden">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
         .font-display{font-family:'Syne',sans-serif}
-        .font-body{font-family:'DM Sans',sans-serif}
         @keyframes slide-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
         @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}

@@ -23,13 +23,14 @@ import {
   Divider,
   CircularProgress,
 } from "@mui/material";
-import { Add, Groups, Work, CheckCircle, Cancel, AttachMoney, Business } from "@mui/icons-material";
+import { Add, Groups, Work, Cancel, AttachMoney, Business } from "@mui/icons-material";
+import Snackbar from "@mui/material/Snackbar";
 import UserMenu from "../../components/UserMenu";
 import { useRouter } from "next/navigation";
 
 const PROJECT_INFO = [
   { icon: "🎯", title: "AI-Powered Matching", desc: "Our FastText AI models match your skills to the best-fit teams and projects automatically." },
-  { icon: "✓", title: "Skill Verification", desc: "Get your skills verified by SMEs to boost credibility and improve your AI match scores." },
+  { icon: "✓", title: "Skill Verification", desc: "Get your skills verified through AI-powered quizzes to boost credibility and improve your AI match scores." },
   { icon: "💼", title: "Direct Job Offers", desc: "Companies discover you based on your skills and send you job offers directly through the platform." },
 ];
 
@@ -44,6 +45,7 @@ export default function StudentDashboard() {
   const [unverifiedSkills, setUnverifiedSkills] = useState<string[]>([]);
   const [companyOffers, setCompanyOffers] = useState<any[]>([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
+  const [sveSnackbar, setSveSnackbar] = useState("");
 
   const [studentInfo, setStudentInfo] = useState({
     id: 0,
@@ -63,6 +65,25 @@ export default function StudentDashboard() {
     fetchStudentInfo();
     fetchStudentSkills();
     fetchCompanyOffers();
+
+    // Change 4: Handle redirect from SVE quiz result page
+    const params = new URLSearchParams(window.location.search);
+    const verifiedSkill = params.get("verifiedSkill");
+    const fromSVE = params.get("fromSVE");
+    if (verifiedSkill && fromSVE) {
+      setTabIndex(0); // Switch to Skills tab
+      setSveSnackbar(`Your ${verifiedSkill} skill was just verified via quiz!`);
+      const token = localStorage.getItem("token");
+      if (token) {
+        window.open(
+          `http://localhost:5173/roadmap/${encodeURIComponent(verifiedSkill)}?token=${encodeURIComponent(token)}`,
+          "_blank"
+        );
+      }
+      // Clean URL params
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    }
   }, []);
 
   useEffect(() => {
@@ -168,6 +189,17 @@ export default function StudentDashboard() {
 
       const data = await res.json();
       if (res.ok) {
+        // Sync skill to SVE (fire-and-forget)
+        try {
+          await fetch("http://localhost:5005/api/skills/sync-add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ skill: newSkill.trim() }),
+          });
+        } catch {}
         setNewSkill("");
         fetchStudentSkills(); // Refresh skills list
       } else {
@@ -245,31 +277,7 @@ export default function StudentDashboard() {
     return t;
   };
 
-  const handleVerifySkill = async (skill: string) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
 
-    try {
-      const res = await fetch("http://localhost:5000/api/verifySkill", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ skill }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        fetchStudentSkills(); // Refresh skills list
-      } else {
-        alert(data.error || "Failed to verify skill");
-      }
-    } catch (err) {
-      console.error("Error verifying skill:", err);
-      alert("Error verifying skill");
-    }
-  };
 
   const handleRemoveSkill = async (skill: string, type: "verified" | "unverified") => {
     if (!confirm(`Are you sure you want to remove "${skill}"?`)) return;
@@ -289,6 +297,17 @@ export default function StudentDashboard() {
 
       const data = await res.json();
       if (res.ok) {
+        // Sync removal to SVE (fire-and-forget)
+        try {
+          await fetch("http://localhost:5005/api/skills/sync-remove", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ skill, type }),
+          });
+        } catch {}
         fetchStudentSkills(); // Refresh skills list
       } else {
         alert(data.error || "Failed to remove skill");
@@ -507,22 +526,6 @@ export default function StudentDashboard() {
                       </Typography>
                       <Button
                         size="small"
-                        variant="contained"
-                        color="success"
-                        onClick={() => handleVerifySkill(skill)}
-                        sx={{
-                          minWidth: "auto",
-                          px: 1,
-                          py: 0.25,
-                          fontSize: "0.7rem",
-                          height: "24px",
-                          textTransform: "none"
-                        }}
-                      >
-                        ✓
-                      </Button>
-                      <Button
-                        size="small"
                         variant="outlined"
                         color="primary"
                         onClick={() => {
@@ -571,7 +574,7 @@ export default function StudentDashboard() {
             {/* Skills Info */}
             <Card sx={{ maxWidth: 900, mx: "auto", p: 2, bgcolor: "#f0f9ff" }}>
               <Typography variant="body2" color="text.secondary">
-                <strong>Tip:</strong> Verify your skills to improve team recommendations and increase your visibility to employers.
+                <strong>Tip:</strong> Verify your skills via the Skill Verification Quiz to improve team recommendations and increase your visibility to employers.
               </Typography>
             </Card>
           </Box>
@@ -770,6 +773,18 @@ export default function StudentDashboard() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* SVE verification success snackbar */}
+      <Snackbar
+        open={!!sveSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setSveSnackbar("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSveSnackbar("")} severity="success" sx={{ width: "100%" }}>
+          {sveSnackbar}
+        </Alert>
+      </Snackbar>
     </main>
   );
 }

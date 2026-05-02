@@ -8,6 +8,6 @@ const router = express.Router();
  * GET /api/roadmap/:studentId/:skill
  * Returns the saved roadmap for a student + skill from their skillProfiles.
  */
-router.get("/:studentId/:skill", protect, getRoadmap);
+router.get("/:studentId/:skill", getRoadmap);
 
 export default router;

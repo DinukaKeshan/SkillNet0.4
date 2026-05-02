@@ -1,7 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import Home from "./pages/Home";
+import SkillsPage from "./pages/SkillsPage";
 import VerifySkill from "./pages/VerifySkill";
+import QuizHistoryPage from "./pages/QuizHistoryPage";
+import ProfilePage from "./pages/ProfilePage";
 import QuizPage from "./pages/QuizPage";
 import QuizSummary from "./pages/QuizSummary";
 import QuizResultPage from "./pages/QuizResultPage";
@@ -32,14 +36,22 @@ function AppRoutes() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<RequireAuth><VerifySkill /></RequireAuth>} />
+        {/* 5 main nav tabs */}
+        <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
+        <Route path="/skills" element={<RequireAuth><SkillsPage /></RequireAuth>} />
         <Route path="/verify-skill" element={<RequireAuth><VerifySkill /></RequireAuth>} />
+        <Route path="/quiz-history" element={<RequireAuth><QuizHistoryPage /></RequireAuth>} />
+        <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+
+        {/* Functional routes (unchanged) */}
         <Route path="/quiz-summary" element={<RequireAuth><QuizSummary /></RequireAuth>} />
         <Route path="/quiz/result/:attemptId" element={<RequireAuth><QuizResultPage /></RequireAuth>} />
         <Route path="/quiz/:skill" element={<RequireAuth><QuizPage /></RequireAuth>} />
         <Route path="/roadmap/:skill" element={<RequireAuth><RoadmapPage /></RequireAuth>} />
         <Route path="/dashboard/skills" element={<RequireAuth><SkillDashboardPage /></RequireAuth>} />
-        <Route path="*" element={<Navigate to="/verify-skill" replace />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

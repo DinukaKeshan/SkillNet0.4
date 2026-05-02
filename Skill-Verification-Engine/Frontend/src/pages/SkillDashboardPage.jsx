@@ -62,9 +62,7 @@ export default function SkillDashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
         .font-display { font-family: 'Syne', sans-serif; }
-        .font-body    { font-family: 'DM Sans', sans-serif; }
         @keyframes slide-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes shimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         .anim-up { animation: slide-up 0.5s cubic-bezier(.16,1,.3,1) both; }
