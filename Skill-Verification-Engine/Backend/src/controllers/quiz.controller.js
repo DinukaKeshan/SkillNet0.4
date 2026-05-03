@@ -515,3 +515,73 @@ export const getAllQuizHistory = async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error" });
   }
 };
+
+// ─── GET QUIZ ATTEMPT DETAIL ─────────────────────────────────────────────────
+
+/**
+ * GET /api/quiz/history/:attemptId
+ * Returns full question-by-question detail for a completed quiz attempt.
+ */
+export const getQuizAttemptDetail = async (req, res) => {
+  try {
+    const { attemptId } = req.params;
+    const userId = req.user._id || req.user.id;
+
+    const quiz = await Quiz.findById(attemptId);
+
+    if (!quiz) {
+      return res.status(404).json({ success: false, error: "Quiz attempt not found" });
+    }
+
+    // Ensure the quiz belongs to the requesting user
+    if (quiz.user?.toString() !== userId.toString()) {
+      return res.status(404).json({ success: false, error: "Quiz attempt not found" });
+    }
+
+    // Build question-by-question breakdown
+    const questions = quiz.questions.map((q, idx) => {
+      const selected = q.selected_answer
+        ? String(q.selected_answer).toUpperCase().trim()
+        : null;
+      const correct = q.correct_answer
+        ? String(q.correct_answer).toUpperCase().trim()
+        : "A";
+      const isCorrect = selected !== null && selected === correct;
+
+      return {
+        index: idx,
+        question: q.question,
+        options: q.options,
+        correct_answer: correct,
+        selected_answer: selected,
+        is_correct: isCorrect,
+        difficulty: q.difficulty || "medium",
+        topic: q.topic || "",
+      };
+    });
+
+    const date = quiz.createdAt
+      ? new Date(quiz.createdAt).toISOString()
+      : null;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        _id: quiz._id,
+        skill: quiz.skill,
+        score: quiz.score,
+        total: quiz.questions.length,
+        score_pct: quiz.score_pct,
+        verified: quiz.verified,
+        skill_level: quiz.skill_level,
+        attempt_number: quiz.attempt_number,
+        time_taken_sec: quiz.time_taken_sec,
+        createdAt: date,
+        questions,
+      },
+    });
+  } catch (error) {
+    console.error("getQuizAttemptDetail error:", error);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+};

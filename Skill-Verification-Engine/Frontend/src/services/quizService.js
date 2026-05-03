@@ -28,3 +28,7 @@ export const submitQuiz = (quizId, answers, timeTakenSec) =>
 // Get all completed quiz history for current user
 export const getAllQuizHistory = () =>
   API.get("/quiz/history/all");
+
+// Get full detail (questions + answers) for a single quiz attempt
+export const getQuizAttemptDetail = (attemptId) =>
+  API.get(`/quiz/history/${attemptId}`);
