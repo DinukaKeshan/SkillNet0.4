@@ -337,7 +337,9 @@ venv\Scripts\activate
 # Install dependencies (first time only)
 pip install -r requirements.txt
 
-# Train the model (first time only — generates .pkl files)
+# Train the model (first time only — reads dataset.csv, generates .pkl files)
+# dataset.csv is already included in the repo with 1000 labelled records.
+# To regenerate or expand the dataset, run: python generate_dataset.py
 python train.py
 
 # Start the ML service
