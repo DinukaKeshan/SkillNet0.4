@@ -19,6 +19,9 @@ export function AuthProvider({ children }) {
 
     if (urlToken) {
       localStorage.setItem("token", urlToken);
+      // Clear any previously cached user so the restore effect
+      // fetches fresh data for the new token instead of using stale cache
+      localStorage.removeItem("user");
 
       if (urlSkill) {
         sessionStorage.setItem("sve_pending_skill", urlSkill);

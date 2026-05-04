@@ -24,6 +24,7 @@ import {
     DeleteForever,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 type UserMenuProps = {
     userName: string;
@@ -33,6 +34,7 @@ type UserMenuProps = {
 
 export default function UserMenu({ userName, userAvatar, onProfileUpdate }: UserMenuProps) {
     const router = useRouter();
+    const { logout } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openChangePassword, setOpenChangePassword] = useState(false);
     const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
@@ -50,9 +52,7 @@ export default function UserMenu({ userName, userAvatar, onProfileUpdate }: User
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        router.push("/");
+        logout();
     };
 
     const handleChangePassword = async () => {
@@ -105,9 +105,7 @@ export default function UserMenu({ userName, userAvatar, onProfileUpdate }: User
             const data = await res.json();
             if (res.ok) {
                 alert("Account deleted successfully");
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                router.push("/");
+                logout();
             } else {
                 alert(data.error || "Failed to delete account");
             }
