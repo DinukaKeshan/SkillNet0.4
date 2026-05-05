@@ -8,6 +8,38 @@ const VALID_DIFFICULTIES = ["easy", "medium", "hard"];
 const VALID_ANSWERS = ["A", "B", "C", "D"];
 
 /**
+ * Sanitises a single question object from the LLM, fixing common quirks:
+ *  - Dot-prefixed field names (".options" → "options")
+ *  - Whitespace / case issues in correct_answer and difficulty
+ */
+function sanitizeQuestion(q) {
+  if (!q || typeof q !== "object") return q;
+
+  // Fix dot-prefixed keys (e.g. ".options" → "options")
+  for (const key of Object.keys(q)) {
+    if (key.startsWith(".")) {
+      const clean = key.slice(1);
+      if (!q[clean]) {              // don't overwrite an existing good key
+        q[clean] = q[key];
+      }
+      delete q[key];
+    }
+  }
+
+  // Normalise correct_answer: trim + uppercase
+  if (q.correct_answer) {
+    q.correct_answer = String(q.correct_answer).trim().toUpperCase();
+  }
+
+  // Normalise difficulty: trim + lowercase
+  if (q.difficulty) {
+    q.difficulty = String(q.difficulty).trim().toLowerCase();
+  }
+
+  return q;
+}
+
+/**
  * Validates a single question object from the batch response.
  */
 function validateQuestion(q) {
@@ -57,9 +89,11 @@ export async function generateRagQuiz(skill, excludeHashes = []) {
         throw new Error(`Expected 10 questions, got ${result.length}`);
       }
 
-      // Validate each question
+      // Sanitise + validate each question
+      result.forEach((q, i) => { result[i] = sanitizeQuestion(q); });
       const invalid = result.findIndex(q => !validateQuestion(q));
       if (invalid !== -1) {
+        console.warn(`⚠️  Question ${invalid} after sanitisation:`, JSON.stringify(result[invalid]));
         throw new Error(`Question at index ${invalid} failed validation`);
       }
 
